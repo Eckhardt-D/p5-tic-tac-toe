@@ -5,7 +5,7 @@ class Controller {
     this.imageY = height - 60;
     this.imageW = 100;
     this.imageH = 50;
-    this.gameOver = false;
+    this.gameOver = true;
   }
 
   update() {
@@ -36,5 +36,26 @@ class Controller {
     } else {
       this.mode = 'x';
     }
+  }
+
+  start(mode) {
+    menu.w = 0;
+    menu.h = 0;
+    menu.title = '';
+    menu.singleButton.hide();
+    menu.multiButton.hide();
+    menu.isShown = false;
+    // Mode logic
+  }
+
+  end() {
+   menu.x = width / 2;
+   menu.y = height / 2;
+   menu.h = 250;
+   menu.w = 300;
+   menu.singleButton.show();
+   menu.multiButton.show();
+   menu.title = 'MENU';
+   menu.isShown = true;
   }
 }

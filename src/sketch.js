@@ -1,7 +1,8 @@
 let onSwitch;
 let offSwitch;
-let grid;
 let controls;
+let grid;
+let menu;
 
 function preload() {
   onSwitch = loadImage('./src/assets/switch-on.png');
@@ -10,6 +11,11 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+
+  /**
+   * Create game menu
+   */
+  menu = new Menu();
 
   /**
    * Create the game grid, with a square size of 90
@@ -40,15 +46,23 @@ function draw() {
   /**
    * Redraw the grid every frame
    */
-  grid.create();
-  controls.update();
+  if(!menu.isShown) {
+    grid.create();
+    controls.update();
+    controls.gameOver = false;
+  }
+
+  /**
+   * Draw menu at start, death and quit
+   */
+  menu.update();
 }
 
 function mousePressed() {
   /**
    * Only let click affect game if game is not over
    */
-  if(!controls.gameOver) {
+  if(!controls.gameOver && !menu.isShown) {
     /**
      * Handle the mode of the controller
      */
@@ -136,6 +150,9 @@ function mousePressed() {
          * Set the game to game over
          */
         controls.gameOver = true;
+        controls.end();
+        grid.reset();
+        controls.mode = 'x';
       }
     });
   }

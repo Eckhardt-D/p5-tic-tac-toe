@@ -69,4 +69,9 @@ class Grid {
     this.line.x2 = c.x;
     this.line.y2 = c.y;
   }
+
+  reset() {
+    this.drawX = [];
+    this.line = {};
+  }
 }
