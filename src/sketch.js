@@ -1,136 +1,53 @@
 let onSwitch;
 let offSwitch;
-
-class Grid {
-  constructor(squareHeight) {
-    this.h = squareHeight;
-    this.x = width / 2 - this.h * 1.5;
-    this.y = height / 2 - this.h * 1.5;
-    this.locations = [];
-    this.drawX = [];
-    this.line = {};
-  }
-
-  create() {
-    // Draw play area grid
-    this.locations.forEach(location => {
-      fill(255);
-      stroke(0);
-      rect(location.x, location.y, this.h, this.h);
-    });
-
-    if(this.drawX.length) {
-      this.drawX.forEach(mark => {
-        fill(0);
-        textAlign(CENTER, CENTER);
-        text(mark.mark, mark.x, mark.y);
-      });
-    }
-
-    if(this.line.x1) {
-      line(this.line.x1, this.line.y1, this.line.x2, this.line.y2);
-    }
-  }
-
-  layout() {
-    for (let i = 0; i < 3; i++) {
-      for (let j = 0; j < 3; j++) {
-        this.locations.push({
-          x: i * this.h + this.x,
-          y: j * this.h + this.y
-        });
-      }      
-    }
-  }
-
-  markX({x, y, mark, index}) {
-    this.drawX[index] = { x, y, mark };
-  }
-
-  drawLine(a, b, c) {
-    this.line.x1 = a.x;
-    this.line.y1 = a.y;
-    this.line.x2 = c.x;
-    this.line.y2 = c.y;
-
-    controls.gameOver = true;
-  }
-}
-
-class Controller {
-  constructor(mode) {
-    this.mode = mode;
-    this.imageX = width / 2 - 50;
-    this.imageY = height - 60;
-    this.imageW = 100;
-    this.imageH = 50;
-    this.gameOver = false;
-  }
-
-  setMode(mode) {
-    switch(mode) {
-      case 'x':
-        this.mode = 'x';
-        break;
-      case 'o':
-        this.mode = 'o';
-        break;
-      default:
-        this.mode = 'x';
-        break;
-    }
-  }
-
-  update() {
-    fill(0);
-    textAlign(CENTER);
-    text('x', width / 2 - 75, height - 20);
-    text('o', width / 2 + 75, height - 20);
-
-    if(this.mode === 'x') {
-      image(onSwitch, this.imageX, this.imageY, this.imageW, this.imageH);
-    } else {
-      image(offSwitch, this.imageX, this.imageY, this.imageW, this.imageH);
-    }
-  }
-
-  switch() {
-    if(this.mode === 'x') {
-      this.mode = 'o';
-    } else {
-      this.mode = 'x';
-    }
-  }
-}
-
 let grid;
 let controls;
 
 function preload() {
-  onSwitch = loadImage('./src/switch-on.png');
-  offSwitch = loadImage('./src/switch-off.png');
+  onSwitch = loadImage('./src/assets/switch-on.png');
+  offSwitch = loadImage('./src/assets/switch-off.png');
 }
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
+
+  /**
+   * Create the game grid, with a square size of 90
+   */
   grid = new Grid(90);
   grid.layout();
 
+  /**
+   * Create a controller that switches
+   * between o and x
+   */
   controls = new Controller('x');
 }
 
+/**
+ * Main game loop
+ */
 function draw() {
+  /**
+   * Canvas layout and game title
+   */
   background(255);  
   textAlign(CENTER);
   fill(0);
   textSize(52);
   text("Tic Tac Toe!", width / 2, 100);
 
+  /**
+   * Redraw the grid every frame
+   */
   grid.create();
   controls.update();
 }
 
 function mousePressed() {
+  /**
+   * Only let click affect game if game is not over
+   */
   if(!controls.gameOver) {
     /**
      * Handle the mode of the controller
@@ -151,18 +68,33 @@ function mousePressed() {
     grid.locations.forEach((block, index) => {
       let mark = controls.mode;
 
+      /**
+       * Check whether the mouse position
+       * is on any of the blocks
+       */
       if(mouseX > block.x && mouseX < block.x + grid.h) {
         if(mouseY > block.y && mouseY < block.y + grid.h) {
+          /**
+           * find the center of the block
+           */
           let x = block.x + grid.h / 2;
           let y = block.y + grid.h / 2;
-          let exists = false;
+          let exists = false; // Boolean to track if we don't already have a symbol in this block
 
+          /**
+           * Test if this block has been marked
+           * (sets the exists variable)
+           */
           grid.drawX.forEach(obj => {
             if(obj.x == x && obj.y == y && obj.mark) {
               exists = true;
             }
           });
 
+          /**
+           * Draw the mark if it is an empty block
+           * and set the control to other team
+           */
           if(!exists) {
             grid.markX({x, y, mark, index});
             controls.switch();
@@ -193,7 +125,17 @@ function mousePressed() {
         grid.drawX[set[2]] &&
         grid.drawX[set[0]].mark == grid.drawX[set[1]].mark &&
         grid.drawX[set[1]].mark == grid.drawX[set[2]].mark) {
-        grid.drawLine(grid.drawX[set[0]], grid.drawX[set[1]], grid.drawX[set[2]]);
+        /**
+         * Only if this is three consecutive in
+         * any of the above orders, draw the line
+         * through the three items
+         */
+        grid.drawLine(grid.drawX[set[0]], grid.drawX[set[2]]);
+
+        /**
+         * Set the game to game over
+         */
+        controls.gameOver = true;
       }
     });
   }
